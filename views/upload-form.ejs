@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .file-item {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+    <script>
+      let selectedFiles = []; // Array to store selected files
+
+      function handleFileSelect(event) {
+        const fileListContainer = document.getElementById("file-list");
+        const files = Array.from(event.target.files);
+
+        files.forEach((file) => {
+          selectedFiles.push(file); // Add the selected file to the array
+
+          const listItem = document.createElement("li");
+          listItem.className = "file-item";
+
+          const fileName = document.createElement("span");
+          fileName.textContent = file.name;
+          listItem.appendChild(fileName);
+
+          const removeButton = document.createElement("button");
+          removeButton.textContent = "Remove";
+          removeButton.addEventListener("click", () => {
+            removeFile(selectedFiles.indexOf(file));
+          });
+          listItem.appendChild(removeButton);
+
+          fileListContainer.appendChild(listItem);
+        });
+      }
+
+      function removeFile(index) {
+        selectedFiles.splice(index, 1); // Remove the file from the array
+
+        const fileListContainer = document.getElementById("file-list");
+        fileListContainer.removeChild(fileListContainer.childNodes[index]);
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        for (let i = 0; i < selectedFiles.length; i++) {
+          formData.append("files", selectedFiles[i]);
+        }
+
+        fetch("/upload-files", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            // Handle the response from the server
+            // ...
+          })
+          .catch((error) => {
+            // Handle any errors
+            // ...
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <form onsubmit="handleSubmit(event)">
+      <label>Avatar</label>
+      <input
+        type="file"
+        name="files"
+        multiple
+        accept=".jpg, .jpeg, .png"
+        onchange="handleFileSelect(event)"
+      />
+      <button type="submit">Upload</button>
+    </form>
+
+    <ul id="file-list"></ul>
+  </body>
+</html>
